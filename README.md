@@ -7,6 +7,6 @@
 [Image Colorization](https://www.kaggle.com/datasets/shravankumar9892/image-colorization)
 
 ## Contributors
-- Marlena Alvino [(@marlenaalvino)](https://github.com/marlenaalvino)
-- Laura Anker [(@laura-anker)](https://github.com/laura-anker)
-- Kealia Niles [(@kealia)](https://github.com/kealia)
+- Marlena Alvino ([@marlenaalvino](https://github.com/marlenaalvino))
+- Laura Anker ([@laura-anker](https://github.com/laura-anker))
+- Kealia Niles ([@kealia](https://github.com/kealia))
