@@ -1,0 +1,5 @@
+# MacOS-specific files
+.DS_Store
+
+# Image data
+Data/
