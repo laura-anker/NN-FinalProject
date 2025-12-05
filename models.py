@@ -53,13 +53,13 @@ class UNetGenerator(nn.Module):
         # Decoder: progressively upsamples (7 → 224) and fuses encoder skips to recover spatial detail
         # Note: in_c values account for concatenation with the corresponding encoder feature maps
         self.up5 = UpBlock(features * 8, features * 8, dropout=True)
-        self.up4 = UpBlock(features * 16, features * 8, dropout=True)
-        self.up3 = UpBlock(features * 16, features * 4)
-        self.up2 = UpBlock(features * 8, features * 2)
-        self.up1 = UpBlock(features * 4, features)
+        self.up4 = UpBlock(features * 16, features * 4, dropout=True)
+        self.up3 = UpBlock(features * 8, features * 2)
+        self.up2 = UpBlock(features * 4, features)
+        self.up1 = UpBlock(features * 2, features)
 
         # Final: maps top-level decoder features to the desired output channels
-        self.final = nn.Conv2d(features * 2, out_channels, kernel_size=1)
+        self.final = nn.Conv2d(features, out_channels, kernel_size=1)
 
         # Activation: projects the output to [-1, 1] for normalized ab channels
         self.activation = nn.Tanh()
@@ -77,19 +77,18 @@ class UNetGenerator(nn.Module):
 
         # Decoder and skips
         u5 = self.up5(b)                 # 512 @ 14x14
-        u5 = torch.cat([u5, d5], dim=1)  # 1024 @ 14x14
+        u5 = torch.cat([u5, d4], dim=1)  # 1024 @ 14x14
 
         u4 = self.up4(u5)                # 512 @ 28x28
-        u4 = torch.cat([u4, d4], dim=1)  # 1024 @ 28x28
+        u4 = torch.cat([u4, d3], dim=1)  # 1024 @ 28x28
 
         u3 = self.up3(u4)                # 256 @ 56x56
-        u3 = torch.cat([u3, d3], dim=1)  # 512 @ 56x56
+        u3 = torch.cat([u3, d2], dim=1)  # 512 @ 56x56
 
         u2 = self.up2(u3)                # 128 @ 112x112
-        u2 = torch.cat([u2, d2], dim=1)  # 256 @ 112x112
+        u2 = torch.cat([u2, d1], dim=1)  # 256 @ 112x112
 
         u1 = self.up1(u2)                # 64 @ 224x224
-        u1 = torch.cat([u1, d1], dim=1)  # 128 @ 224x224
 
         # Final and activation
         out = self.final(u1)             # out_channels @ 224x224
