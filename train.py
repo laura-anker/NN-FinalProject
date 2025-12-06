@@ -146,9 +146,9 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
         # Checkpoint the model if the validation L1 loss has improved
         if avg_l1 < best_val_loss:
             best_val_loss = avg_l1
-            os.makedirs("checkpoints", exist_ok=True)
-            torch.save(generator.state_dict(), "checkpoints/best_generator.pth")
-            torch.save(discriminator.state_dict(), "checkpoints/best_discriminator.pth")
+            os.makedirs("models", exist_ok=True)
+            torch.save(generator.state_dict(), "models/best_generator.pth")
+            torch.save(discriminator.state_dict(), "models/best_discriminator.pth")
             print(f"  -> Saved new best model at epoch {epoch} with validation L1 loss: {avg_l1:.4f}")
 
         # Save colorization progress photos every 5 epochs if img_sample_idx is specified
@@ -163,7 +163,7 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
                 ab_pred = generator(L)[0].cpu()
 
             # Convert to numpy for LAB-to-RGB conversion
-            L_np       = sample["L"].cpu().squeeze().numpy()
+            L_np = sample["L"].cpu().squeeze().numpy()
             ab_pred_np = ab_pred.permute(1, 2, 0).numpy()
 
             # Convert from LAB to RGB color space
