@@ -2,13 +2,13 @@ import torch
 import numpy as np 
 from torch.utils.data import Dataset, DataLoader
 
-
+# TODO add comment about class 
 class ColorizationDataset(Dataset):
     # Create the dataset with L/ab data and the optional transform
-    def __init__(self, l_data, ab_data, transform=None):
+    def __init__(self, l_data, ab_data, augment=False):
         self.l_data = l_data
         self.ab_data = ab_data
-        self.transform = transform
+        self.augment = augment
 
         assert self.l_data.shape[0] == self.ab_data.shape[0], "Mismatch in L and ab channel counts"
 
@@ -22,9 +22,10 @@ class ColorizationDataset(Dataset):
         L = self.l_data[idx]        # Shape: (H, W) = (224, 224)
         ab = self.ab_data[idx]      # Shape: (H, W, 2) = (224, 224, 2)
 
-        # Apply the optional transform on the raw data
-        if self.transform is not None:
-            L, ab = self.transform(L, ab)
+        # TODO Apply the optional transform on the raw data
+        if self.augment:
+            L = L
+            ab = ab
 
         # Normalize each of the L/ab channels 
         L = (L.astype("float32") / 255.0)                   # 0 to 255 → 0 to 1

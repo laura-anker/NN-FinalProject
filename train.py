@@ -2,9 +2,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-# TODO 
-# Add ability to checkpoint model 
-# Add ability to save progress photos during training 
+# TODO Add ability to checkpoint model 
+# TODO Add ability to save progress photos during training 
 
 # Trains the conditional GAN (cGAN) for colorization using the provided generator and discriminator models.
 def train_cgan(generator, discriminator, train_loader, val_loader, device, epochs=20):
@@ -34,7 +33,7 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
         generator.train()
         discriminator.train()
 
-        # Initialize counters for the training metrics
+        # Initialize accumulators for the training metrics
         total_g = 0.0
         total_d = 0.0
         num_batches = 0
@@ -94,7 +93,7 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
         # Switch the generator into evaluation mode 
         generator.eval()
 
-        # Initialize counters for the validation metrics 
+        # Initialize accumulators for the validation metrics 
         total_l1 = 0.0
         total_psnr = 0.0
         num_batches = 0
@@ -115,9 +114,8 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
                 total_l1 += l1_loss.item()
 
                 # Compute the PSNR for this batch and add it to the running total
-                mse_value = mse(fake_ab, ab)
-                mse_value = mse_value.clamp(min=1e-8)
-                psnr = 10 * torch.log10(4.0 / mse_value)
+                mse_val = mse(fake_ab, ab).clamp(min=1e-8)
+                psnr = 10 * torch.log10(4.0 / mse_val)
                 total_psnr += psnr.item()
 
                 # Increment the batch counter

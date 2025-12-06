@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Converts a LAB image to RGB
+# Converts from LAB to RGB color space
 def lab_to_rgb(L_norm, ab_norm):
     # Undo the normalization
     L = L_norm * 255
@@ -18,26 +18,55 @@ def lab_to_rgb(L_norm, ab_norm):
     rgb = np.clip(rgb / 255, 0, 1)
     return rgb
 
-def show_prediction(generator, dataset, idx=0):
-    generator.eval()
-    sample = dataset[idx]
-
-    L = sample["L"].unsqueeze(0).to(next(generator.parameters()).device)
-    ab_true = sample["ab"]
-
-    with torch.no_grad():
-        ab_pred = generator(L).cpu()[0]
-
-    # Convert to numpy for LAB-to-RGB
-    L_np = L.cpu()[0].squeeze().numpy()
-    ab_pred_np = ab_pred.permute(1,2,0).numpy()
-    ab_true_np = ab_true.permute(1,2,0).numpy()
-
-    rgb_pred = lab_to_rgb(L_np, ab_pred_np)
-    rgb_true = lab_to_rgb(L_np, ab_true_np)
-
-    plt.figure(figsize=(10,4))
-    plt.subplot(1,3,1); plt.imshow(L_np, cmap="gray"); plt.title("L"); plt.axis("off")
-    plt.subplot(1,3,2); plt.imshow(rgb_true); plt.title("True"); plt.axis("off")
-    plt.subplot(1,3,3); plt.imshow(rgb_pred); plt.title("Predicted"); plt.axis("off")
+# Plots the generator and discriminator losses over epochs
+def plot_gd_losses(g_losses, d_losses):
+    plt.figure(figsize=(10, 6))
+    plt.plot(g_losses, label="Generator Loss", linewidth=2, color="#B77DD4")
+    plt.plot(d_losses, label="Discriminator Loss", linewidth=2, color="#FFB2CC")
+    plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))
+    plt.xlabel("Epoch",)
+    plt.ylabel("Loss")
+    plt.title("Generator and Discriminator Loss Over Epochs")
+    plt.grid(alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
     plt.show()
+
+# Plots a validation metric (e.g., L1 loss or PSNR) over epochs
+def plot_val_metric(metric_values, metric_name):
+    plt.figure(figsize=(10, 6))
+    plt.plot(metric_values, linewidth=2, color="hotpink")
+    plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))
+    plt.xlabel("Epoch")
+    plt.ylabel(metric_name)
+    plt.title(f"Validation {metric_name} Over Epochs")
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
+# TODO finish and comment this function 
+# def show_image(sample, mode=0):
+#     mode 0 is both, 1 is l , 2 is ab
+
+
+#     L_norm = sample['L'].numpy()[0]                   # (1,224,224) -> (244,244)
+#     ab_norm = sample['ab'].numpy().transpose(1,2,0)   # (2,244,244) -> (224,224,2)
+
+#     # Show the grayscale L channel
+
+#     plt.figure(figsize=(10,5))
+
+#     plt.subplot(1,2,1)
+#     plt.imshow(L_norm, cmap="gray")
+#     plt.title("Grayscale L channel")
+#     plt.axis("off")
+
+#     # Convert to RGB
+#     rgb = lab_to_rgb(L_norm, ab_norm)
+
+#     # Visualize
+#     plt.subplot(1,2,2)
+#     plt.imshow(rgb)
+#     plt.title("Reconstructed RGB from LAB")
+#     plt.axis("off")
+#     plt.show()
