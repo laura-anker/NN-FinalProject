@@ -1,12 +1,11 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
-# TODO Add ability to checkpoint model 
-# TODO Add ability to save progress photos during training 
+from utils import save_sample_image
 
 # Trains the conditional GAN (cGAN) for colorization using the provided generator and discriminator models.
-def train_cgan(generator, discriminator, train_loader, val_loader, device, epochs=20):
+def train_cgan(generator, discriminator, train_loader, val_loader, device, epochs=20, img_sample_idx=-1):
     # Move the models to the specified device (CPU or GPU)
     generator = generator.to(device)
     discriminator = discriminator.to(device)
@@ -20,6 +19,9 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
     l1 = nn.L1Loss()                    # Reconstruction loss (accuracy in the generated color channels)
     mse = nn.MSELoss()                  # Mean Squared Error loss (for PSNR calculation)
     lambda_l1 = 100
+
+    # Initialize the best validation loss for checkpointing
+    best_val_loss = +float('inf')
 
     # Initialize lists to track various metrics across epochs
     g_losses = []
@@ -109,6 +111,14 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
                 # Generate fake ab channels
                 fake_ab = generator(L)
 
+                # TODO Add ability to save progress photos during training 
+                # Periodically save sample images for visual progress tracking
+                # if img_sample_idx >= 0 and (epoch == 1 or epoch % 5 == 0):
+                #     save_sample_image(
+                #         L.cpu(), ab.cpu(), fake_ab.cpu(),
+                #         epoch, img_sample_idx
+                #     )
+
                 # Compute the L1 loss for this batch and add it to the running total
                 l1_loss = l1(fake_ab, ab)
                 total_l1 += l1_loss.item()
@@ -139,6 +149,14 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
             f"Val L1: {avg_l1:>7.4f} | "
             f"Val PSNR: {avg_psnr:>7.2f} dB"
         )
+
+        # Checkpoint the model if the validation L1 loss has improved
+        if avg_l1 < best_val_loss:
+            best_val_loss = avg_l1
+            os.makedirs("checkpoints", exist_ok=True)
+            torch.save(generator.state_dict(), "checkpoints/best_generator.pth")
+            torch.save(discriminator.state_dict(), "checkpoints/best_discriminator.pth")
+            print(f"  -> Saved new best model at epoch {epoch} with L1 validation loss: {avg_l1:.4f}")
     
     # Return the recorded metrics after training is complete
     return g_losses, d_losses, val_L1_losses, val_PSNR
