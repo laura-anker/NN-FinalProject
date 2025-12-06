@@ -51,21 +51,21 @@ def evaluate_model(generator, data_loader, device):
     # Return the average L1 loss and PSNR
     return avg_l1, avg_psnr
 
-# TODO check and comment
+# Predicts and visualizes the colorization of a single grayscale image using the trained generator model
 def predict(generator, img_data, save_path=None):
     # Switch the generator into evaluation mode 
     generator.eval()
 
-    #
+    # Load and prepare the L/ab channels 
     L = img_data["L"].unsqueeze(0).to(next(generator.parameters()).device)
     ab_true = img_data["ab"]
 
     # Disable gradient computation for evaluation
     with torch.no_grad():
-        #
+        # Generate the predicted ab channels
         ab_pred = generator(L).cpu()[0]
 
-    # Convert to numpy for LAB-to-RGB
+    # Convert to numpy for LAB-to-RGB conversion
     L_np = L.cpu()[0].squeeze().numpy()
     ab_pred_np = ab_pred.permute(1,2,0).numpy()
     ab_true_np = ab_true.permute(1,2,0).numpy()
@@ -76,12 +76,28 @@ def predict(generator, img_data, save_path=None):
 
     # Save the predicted and true images if a save path is provided
     if save_path is not None:
-        plt.imsave(os.path.join(save_path, "predicted.png"), rgb_pred)
+        os.makedirs(save_path, exist_ok=True)
+        plt.imsave(os.path.join(save_path, "grayscale.png"), L_np, cmap="gray")
         plt.imsave(os.path.join(save_path, "true.png"), rgb_true)
+        plt.imsave(os.path.join(save_path, "predicted.png"), rgb_pred)
 
     # Visualize the grayscale, true, and predicted images
-    plt.figure(figsize=(10,4))
-    plt.subplot(1,3,1); plt.imshow(L_np, cmap="gray"); plt.title("L"); plt.axis("off")
-    plt.subplot(1,3,2); plt.imshow(rgb_true); plt.title("True"); plt.axis("off")
-    plt.subplot(1,3,3); plt.imshow(rgb_pred); plt.title("Predicted"); plt.axis("off")
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+    fig.subplots_adjust(left=0.03, right=0.97, top=0.90, bottom=0.03, wspace=0.15)
+    
+    # Grayscale L channel
+    axes[0].imshow(L_np, cmap="gray")
+    axes[0].set_title("Grayscale (L)", fontsize=12)
+    axes[0].axis("off")
+    
+    # True RGB (from LAB)
+    axes[1].imshow(rgb_true)
+    axes[1].set_title("True (L/ab)", fontsize=12)
+    axes[1].axis("off")
+    
+    # Predicted RGB (from LAB)
+    axes[2].imshow(rgb_pred)
+    axes[2].set_title("Predicted (L/ab)", fontsize=12)
+    axes[2].axis("off")
+
     plt.show()
