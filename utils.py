@@ -70,3 +70,62 @@ def plot_val_metric(metric_values, metric_name):
 #     plt.title("Reconstructed RGB from LAB")
 #     plt.axis("off")
 #     plt.show()
+
+# Take ANY image, crop/resize it, convert to LAB, and produce the correct L tensor
+def prepare_ijmage(image_path, target_size=224):
+    # load image
+    img = cv2.imread(image_path)
+    if img is None:
+        raise ValueError(f"Could not read image at: {image_path}")
+    
+    # convert from OpenCV BRG -> RGB for our model
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # extract height, width, # channels in image
+    h, w, _ = img.shape
+    min_dim = min(h,w)
+
+    # compute how much to crop from each side
+    top = (h - min_dim) // 2
+    left = (w - min_dim) // 2
+
+    # numpy slicing to extract centered square
+    img_cropped = img[top:top+min_dim, left:left+min_dim]
+
+    # resize to model input size
+    img_resized = cv2.resize(img_cropped, (target_size, target_size))
+    
+    # convert to lab
+    lab = cv2.cvtColor(img_resized, cv2.COLOR_RGB2LAB)
+
+    # extract L channel, normalize, convert to Pytorch tensor
+    L = lab[:, :, 0].astype("float32")
+    L_norm = L / 255.0
+    L_tensor = torch.tensor(L_norm).unsqueeze(0).unsqueeze(0).float()
+
+    return L_tensor, img_resized
+
+# visualize RGB prediction for images outside dataset 
+def predict_color(generator, L_tensor):
+    # send input tensor to same device as model
+    device = next(generator.parameters()).device
+    generator.eval()
+
+    # turn off gradient tracking to speed up inference & save memory
+    with torch.no_grad():
+        L_input = L_tensor.to(device)
+        fake_ab = generator(L_input)[0].cpu().permute(1,2,0).numpy()
+
+    # convert normalized → real LAB values
+    a = fake_ab[..., 0] * 128 + 128
+    b = fake_ab[..., 1] * 128 + 128
+
+    # reconstruct L channel back to 0–255, and stack L,a,b into LAB image
+    L = (L_tensor.numpy()[0, 0] * 255).astype("float32")
+    lab = np.stack([L, a, b], axis=-1).astype("uint8")
+
+    # convert LAB -> color then normalize
+    rgb = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
+    rgb = np.clip(rgb / 255.0, 0, 1)
+
+    return rgb
