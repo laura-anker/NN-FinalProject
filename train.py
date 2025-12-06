@@ -1,8 +1,9 @@
 import os
+import utils
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from utils import save_sample_image
+import matplotlib.pyplot as plt
 
 # Trains the conditional GAN (cGAN) for colorization using the provided generator and discriminator models.
 def train_cgan(generator, discriminator, train_loader, val_loader, device, epochs=20, img_sample_idx=-1):
@@ -111,14 +112,6 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
                 # Generate fake ab channels
                 fake_ab = generator(L)
 
-                # TODO Add ability to save progress photos during training 
-                # Periodically save sample images for visual progress tracking
-                # if img_sample_idx >= 0 and (epoch == 1 or epoch % 5 == 0):
-                #     save_sample_image(
-                #         L.cpu(), ab.cpu(), fake_ab.cpu(),
-                #         epoch, img_sample_idx
-                #     )
-
                 # Compute the L1 loss for this batch and add it to the running total
                 l1_loss = l1(fake_ab, ab)
                 total_l1 += l1_loss.item()
@@ -156,7 +149,29 @@ def train_cgan(generator, discriminator, train_loader, val_loader, device, epoch
             os.makedirs("checkpoints", exist_ok=True)
             torch.save(generator.state_dict(), "checkpoints/best_generator.pth")
             torch.save(discriminator.state_dict(), "checkpoints/best_discriminator.pth")
-            print(f"  -> Saved new best model at epoch {epoch} with L1 validation loss: {avg_l1:.4f}")
-    
+            print(f"  -> Saved new best model at epoch {epoch} with validation L1 loss: {avg_l1:.4f}")
+
+        # Save colorization progress photos every 5 epochs if img_sample_idx is specified
+        if img_sample_idx >= 0 and (epoch == 1 or epoch % 5 == 0):
+            # Load the L channel of the sample image from the validation dataset and add a batch dimension
+            sample = val_loader.dataset[img_sample_idx]
+            L = sample["L"].unsqueeze(0).to(device)
+
+            # Disable gradient computation for evaluation
+            with torch.no_grad():
+                # Generate the predicted ab channels without the batch dimension
+                ab_pred = generator(L)[0].cpu()
+
+            # Convert to numpy for LAB-to-RGB conversion
+            L_np       = sample["L"].cpu().squeeze().numpy()
+            ab_pred_np = ab_pred.permute(1, 2, 0).numpy()
+
+            # Convert from LAB to RGB color space
+            rgb_pred = utils.lab_to_rgb(L_np, ab_pred_np)
+
+            # Save the predicted image
+            os.makedirs("progress_photos", exist_ok=True)
+            plt.imsave(os.path.join("progress_photos", f"epoch_{epoch}.png"), rgb_pred)
+
     # Return the recorded metrics after training is complete
     return g_losses, d_losses, val_L1_losses, val_PSNR

@@ -65,10 +65,6 @@ def show_image(image_data, mode=0, save_path=None):
         ax.axis("off")
         plt.show()
 
-def save_sample_image(L, ab, fake_ab, epoch, img_sample_idx):
-    # TODO 
-    L
-
 # Plots the generator and discriminator losses over epochs
 def plot_gd_losses(g_losses, d_losses):
     plt.figure(figsize=(10, 6))
