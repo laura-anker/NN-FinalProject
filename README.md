@@ -29,7 +29,7 @@ The [Image Colorization](https://www.kaggle.com/datasets/shravankumar9892/image-
 4. Download the dataset into your Colab environment by running:
     ```bash
     !pip install gdown
-    !gdown --folder https://drive.google.com/drive/folders/1vzL5qBJQ7AQi55g73PXc53MFCupJ3F3T?usp=drive_link -O /content/Data
+    !gdown --folder https://drive.google.com/drive/folders/1vzL5qBJQ7AQi55g73PXc53MFCupJ3F3T?usp=drive_link -O /content/data
     ```
 5. Update the `DATA_ROOT` variable in `main.ipynb` to point to the downloaded dataset.
 6. Run the notebook cells in order to preprocess the data, train the model, and view results.
@@ -46,42 +46,6 @@ The generator model reached a final validation L1 loss of 0.0899 and PSNR of 23.
 <p align="center">
   <img src="images/stacked_sample_predictions.png" width="700">
 </p>
-
-<!-- <div style="display:flex; justify-content:center; gap:20px;">
-  <div style="text-align:center;">
-    <img src="images/sample_predictions/sample_30/true.png" width="300">
-    <div>True</div>
-  </div>
-
-  <div style="text-align:center;">
-    <img src="images/sample_predictions/sample_30/predicted.png" width="300">
-    <div>Predicted</div>
-  </div>
-</div>
-
-<div style="display:flex; justify-content:center; gap:20px;">
-  <div style="text-align:center;">
-    <img src="images/sample_predictions/sample_769/true.png" width="300">
-    <div>True</div>
-  </div>
-
-  <div style="text-align:center;">
-    <img src="images/sample_predictions/sample_769/predicted.png" width="300">
-    <div>Predicted</div>
-  </div>
-</div>
-
-<div style="display:flex; justify-content:center; gap:20px;">
-  <div style="text-align:center;">
-    <img src="images/sample_predictions/sample_40/true.png" width="300">
-    <div>True</div>
-  </div>
-
-  <div style="text-align:center;">
-    <img src="images/sample_predictions/sample_40/predicted.png" width="300">
-    <div>Predicted</div>
-  </div>
-</div> -->
 
 ## 6 Contributors
 - Marlena Alvino ([@marlenaalvino](https://github.com/marlenaalvino))
