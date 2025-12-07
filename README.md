@@ -43,9 +43,11 @@ The [Image Colorization](https://www.kaggle.com/datasets/shravankumar9892/image-
 
 ## 5 Results
 The generator model reached a final validation L1 loss of 0.0899 and PSNR of 23.10 dB. Qualitative examples, like those shown below, demonstrate that it reliably captures the overall color tone and structure of a scene, producing believable skies, water, and broad object regions. However, some fine details and highly saturated areas remain muted or inconsistently colored. 
+<p align="center">
+  <img src="images/stacked_sample_predictions.png" width="700">
+</p>
 
-
-<div style="display:flex; justify-content:center; gap:20px;">
+<!-- <div style="display:flex; justify-content:center; gap:20px;">
   <div style="text-align:center;">
     <img src="images/sample_predictions/sample_30/true.png" width="300">
     <div>True</div>
@@ -79,7 +81,7 @@ The generator model reached a final validation L1 loss of 0.0899 and PSNR of 23.
     <img src="images/sample_predictions/sample_40/predicted.png" width="300">
     <div>Predicted</div>
   </div>
-</div>
+</div> -->
 
 ## 6 Contributors
 - Marlena Alvino ([@marlenaalvino](https://github.com/marlenaalvino))
