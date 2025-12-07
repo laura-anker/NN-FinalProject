@@ -1,6 +1,7 @@
 import os
 import torch
 import utils
+import numpy as np
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
@@ -51,7 +52,7 @@ def evaluate_model(generator, data_loader, device):
     # Return the average L1 loss and PSNR
     return avg_l1, avg_psnr
 
-# Predicts and visualizes the colorization of a single grayscale image using the trained generator model
+# Predicts and visualizes the colorization of a single image from the dataset using the trained generator model
 def predict(generator, img_data, save_path=None):
     # Switch the generator into evaluation mode 
     generator.eval()
@@ -74,7 +75,58 @@ def predict(generator, img_data, save_path=None):
     rgb_pred = utils.lab_to_rgb(L_np, ab_pred_np)
     rgb_true = utils.lab_to_rgb(L_np, ab_true_np)
 
-    # Save the predicted and true images if a save path is provided
+    # Save the grayscale, true, and predicted images if a save path is provided
+    if save_path is not None:
+        os.makedirs(save_path, exist_ok=True)
+        plt.imsave(os.path.join(save_path, "grayscale.png"), L_np, cmap="gray")
+        plt.imsave(os.path.join(save_path, "true.png"), rgb_true)
+        plt.imsave(os.path.join(save_path, "predicted.png"), rgb_pred)
+
+    # Visualize the grayscale, true, and predicted images
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+    fig.subplots_adjust(left=0.03, right=0.97, top=0.90, bottom=0.03, wspace=0.15)
+    
+    # Grayscale L channel
+    axes[0].imshow(L_np, cmap="gray")
+    axes[0].set_title("Grayscale (L)", fontsize=12)
+    axes[0].axis("off")
+    
+    # True RGB (from LAB)
+    axes[1].imshow(rgb_true)
+    axes[1].set_title("True (L/ab)", fontsize=12)
+    axes[1].axis("off")
+    
+    # Predicted RGB (from LAB)
+    axes[2].imshow(rgb_pred)
+    axes[2].set_title("Predicted (L/ab)", fontsize=12)
+    axes[2].axis("off")
+
+    plt.show()
+
+# Predicts and visualizes the colorization of a single arbitrary image using the trained generator model
+def arbitrary_input_predict(generator, img_path, save_path=None):
+    # Prepare the input image
+    L, rgb_true = utils.prepare_image(img_path)
+
+    # Switch the generator into evaluation mode 
+    generator.eval()
+
+    # Move the L tensor to the same device as the model
+    L = L.to(next(generator.parameters()).device)
+
+    # Disable gradient computation for evaluation
+    with torch.no_grad():
+        # Generate the predicted ab channels
+        ab_pred = generator(L).cpu()[0]
+
+    # Convert to numpy for LAB-to-RGB conversion
+    L_np = L.cpu()[0].squeeze().numpy()
+    ab_pred_np = ab_pred.permute(1,2,0).numpy()
+
+    # Convert from LAB to RGB color space
+    rgb_pred = utils.lab_to_rgb(L_np, ab_pred_np)
+
+    # Save the grayscale, true, and predicted images if a save path is provided
     if save_path is not None:
         os.makedirs(save_path, exist_ok=True)
         plt.imsave(os.path.join(save_path, "grayscale.png"), L_np, cmap="gray")
