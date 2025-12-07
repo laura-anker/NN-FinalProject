@@ -85,3 +85,8 @@ The generator model reached a final validation L1 loss of 0.0899 and PSNR of 23.
 - Marlena Alvino ([@marlenaalvino](https://github.com/marlenaalvino))
 - Laura Anker ([@laura-anker](https://github.com/laura-anker))
 - Kealia Niles ([@kealia](https://github.com/kealia))
+
+## 7 References
+- [Colorizing black & white images with U-Net and conditional GAN – A Tutorial](https://towardsdatascience.com/colorizing-black-white-images-with-u-net-and-conditional-gan-a-tutorial-81b2df111cd8/?source=friends_link&sk=e9d275985a6e00ada31e48ddc903fc9d) by Moein Shariatnia
+- [pix2pix 6365a8](https://www.kaggle.com/code/ahmedswillam/pix2pix-6365a8) by Ahmed Swilam 
+- [uNet Image Color](https://www.kaggle.com/code/deepaksaipendyala/unet-image-color) by Deepak Sai Pendyala
